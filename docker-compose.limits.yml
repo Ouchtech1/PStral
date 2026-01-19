@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 1. Backend: Limit to 1GB (Generous for FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - OLLAMA_BASE_URL=http://ollama-container:11434 # Point to the internal container below
+      - ORACLE_DSN=${ORACLE_DSN}
+      - ORACLE_USER=${ORACLE_USER}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: 1024M # Hard limit: 1GB
+          cpus: '1.0'
+    networks:
+      - testing_net
+
+  # 2. Frontend: Limit to 128MB (Nginx is tiny)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - VITE_API_URL=/api/v1
+    ports:
+      - "8080:80" # Use 8080 to avoid conflict if you have other things running
+    deploy:
+      resources:
+        limits:
+          memory: 128M # Hard limit: 128MB
+    networks:
+      - testing_net
+
+  # 3. AI Model (Ollama in Docker): The heavy lifter
+  # We run it INSIDE Docker here to enforce the limit, instead of using the Host's Ollama.
+  ollama-container:
+    image: ollama/ollama:latest
+    volumes:
+      - ${HOME}/.ollama:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 8G # Limit Model to 8GB (Leaves 4GB for OS/DB/Overhead in a 12GB scenario)
+    networks:
+      - testing_net
+
+networks:
+  testing_net:
+
+
+volumes:
+  ollama_data:

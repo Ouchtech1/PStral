@@ -1,0 +1,3 @@
+-- SAMPLE SCHEMA --
+TABLE users (id NUMBER, name VARCHAR2(100), email VARCHAR2(100));
+TABLE policies (id NUMBER, user_id NUMBER, type VARCHAR2(50), amount NUMBER);

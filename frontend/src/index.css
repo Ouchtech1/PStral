@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-cosmic-void text-starlight antialiased font-sans selection:bg-nebula-purple selection:text-white;
+    }
+}
+
+@layer components {
+    .glass-panel {
+        @apply bg-glass-surface backdrop-blur-xl border border-glass-border shadow-lg;
+    }
+
+    .glass-button {
+        @apply bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all duration-300;
+    }
+
+    .shimmer {
+        background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite linear;
+    }
+}
+
+@layer utilities {
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        @apply bg-white/10 rounded-full hover:bg-white/20;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}

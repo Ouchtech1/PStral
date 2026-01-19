@@ -1,0 +1,90 @@
+# =============================================================================
+# Pstral - Production Docker Compose for Linux Server
+# =============================================================================
+# 
+# Usage:
+#   1. Copy .env.example to .env and configure variables
+#   2. Run: docker-compose -f docker-compose.prod.yml up -d
+#   3. Access: http://your-server-ip:5173
+#
+# Prerequisites:
+#   - Ollama installed and running on the host (port 11434)
+#   - Docker and Docker Compose installed
+#   - Optional: NVIDIA GPU with nvidia-docker for faster inference
+#
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # -------------------------------------------------------------------------
+  # Backend - FastAPI Application
+  # -------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pstral-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Ollama Configuration
+      # On Linux, use host.docker.internal or the actual host IP
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-ministral:latest}
+      
+      # Context Management (tune based on your model's context window)
+      - MAX_HISTORY_MESSAGES=${MAX_HISTORY_MESSAGES:-10}
+      - MAX_FILE_CONTENT_LENGTH=${MAX_FILE_CONTENT_LENGTH:-3000}
+      
+      # Oracle Database (optional)
+      - ORACLE_DSN=${ORACLE_DSN:-localhost/XEPDB1}
+      - ORACLE_USER=${ORACLE_USER:-system}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD:-oracle}
+      
+      # Security (CHANGE IN PRODUCTION!)
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in production}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+    volumes:
+      # Persistent storage for SQLite databases (users, conversations, audit)
+      - pstral-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    extra_hosts:
+      # Required for Linux to access host services (like Ollama)
+      - "host.docker.internal:host-gateway"
+    networks:
+      - pstral-network
+
+  # -------------------------------------------------------------------------
+  # Frontend - React/Vite Application
+  # -------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pstral-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - pstral-network
+
+# =============================================================================
+# Networks & Volumes
+# =============================================================================
+networks:
+  pstral-network:
+    driver: bridge
+
+volumes:
+  pstral-data:
+    driver: local

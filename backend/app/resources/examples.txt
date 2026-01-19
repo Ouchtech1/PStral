@@ -1,0 +1,2 @@
+-- EXAMPLES --
+"List all users with auto insurance" -> SELECT u.name FROM users u JOIN policies p ON u.id = p.user_id WHERE p.type = 'AUTO';

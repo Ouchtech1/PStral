@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+    environment:
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-ministral:latest}
+      - MAX_HISTORY_MESSAGES=${MAX_HISTORY_MESSAGES:-10}
+      - MAX_FILE_CONTENT_LENGTH=${MAX_FILE_CONTENT_LENGTH:-3000}
+      - ORACLE_DSN=${ORACLE_DSN:-host.docker.internal/XEPDB1}
+      - ORACLE_USER=${ORACLE_USER:-system}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD:-oracle}
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile # We need to check if frontend has one
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000/api/v1}
+    depends_on:
+      - backend
+
+# Note: We assume Ollama and Oracle are running on the Host machine for now
+# to avoid massive downloads in this demo environment.
+# host.docker.internal allows containers to talk to the host services.
