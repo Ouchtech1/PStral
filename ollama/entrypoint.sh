@@ -8,7 +8,7 @@
 
 set -e
 
-MODEL="${OLLAMA_MODEL:-ministral:3b}"
+MODEL="${OLLAMA_MODEL:-ministral-3:3b}"
 MAX_RETRIES=60
 RETRY_INTERVAL=3
 
@@ -20,35 +20,17 @@ echo "Starting Ollama server..."
 ollama serve &
 OLLAMA_PID=$!
 
-# Wait for Ollama to be ready
+# Wait for Ollama to be ready using native ollama command
 echo "Waiting for Ollama server to be ready..."
 for i in $(seq 1 $MAX_RETRIES); do
-    # Try multiple methods to check if Ollama is ready
-    if command -v curl >/dev/null 2>&1; then
-        # Method 1: Use curl if available
-        if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
-            echo "Ollama server is ready!"
-            break
-        fi
-    elif command -v wget >/dev/null 2>&1; then
-        # Method 2: Use wget if curl is not available
-        if wget -q -O /dev/null http://localhost:11434/api/tags 2>/dev/null; then
-            echo "Ollama server is ready!"
-            break
-        fi
-    else
-        # Method 3: Check if the process is running and port is listening
-        if kill -0 $OLLAMA_PID 2>/dev/null && (netstat -tuln 2>/dev/null | grep -q ":11434" || ss -tuln 2>/dev/null | grep -q ":11434"); then
-            # Give it a bit more time to fully initialize
-            sleep 2
-            echo "Ollama server appears to be ready (process running, port listening)!"
-            break
-        fi
+    if ollama list >/dev/null 2>&1; then
+        echo "Ollama server is ready!"
+        break
     fi
     
     if [ $i -eq $MAX_RETRIES ]; then
         echo "WARNING: Could not verify Ollama server readiness after $MAX_RETRIES attempts"
-        echo "Continuing anyway - Ollama may still be starting..."
+        echo "Continuing anyway..."
         break
     fi
     
