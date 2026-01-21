@@ -43,7 +43,16 @@ class OllamaClient:
                 async with client.stream(
                     "POST", 
                     f"{self.base_url}/api/chat", 
-                    json={"model": settings.OLLAMA_MODEL, "messages": full_messages},
+                    json={
+                        "model": settings.OLLAMA_MODEL,
+                        "messages": full_messages,
+                        "options": {
+                            "temperature": 0.3,  # Plus bas = plus déterministe et concis
+                            "num_predict": 500,   # Limite la longueur max de la réponse (tokens)
+                            "top_p": 0.9,         # Réduit la diversité pour plus de concision
+                            "repeat_penalty": 1.2  # Évite les répétitions
+                        }
+                    },
                 ) as response:
                     async for line in response.aiter_lines():
                         if line:
