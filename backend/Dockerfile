@@ -23,9 +23,10 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/root/.local/bin:$PATH"
 
-# Install runtime libs for Oracle (libaio)
+# Install runtime libs for Oracle (libaio) and wget for healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libaio1 \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /root/.local /root/.local
