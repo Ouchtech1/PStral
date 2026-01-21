@@ -2,10 +2,10 @@ import React from 'react';
 
 const ModeSelectionModal = ({ onSelectMode }) => {
     const modes = [
+        { id: 'chat', label: 'Discussion Générale', icon: '💬', desc: 'Discutez naturellement avec l\'assistant.' },
         { id: 'sql', label: 'Générateur SQL', icon: '💾', desc: 'Convertir le langage naturel en requêtes Oracle SQL.' },
         { id: 'email', label: 'Assistant Email', icon: '📧', desc: 'Rédiger des emails professionnels.' },
         { id: 'wiki', label: 'Rédacteur Wiki', icon: '📝', desc: 'Créer de la documentation technique.' },
-        { id: 'chat', label: 'Discussion Générale', icon: '💬', desc: 'Discutez naturellement avec l\'assistant.' },
     ];
 
 

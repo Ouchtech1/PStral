@@ -20,9 +20,12 @@ export default {
                 'pack-gray-light': '#F3F4F6',
 
                 // Backgrounds (updated for Pack Solutions theme)
-                'cosmic-void': '#0A1628',    // Deep blue-black
-                'cosmic-night': '#0f172a',   // Standard dark
-                'cosmic-dust': '#1e293b',    // Lighter panels
+                'cosmic-void': '#0A1628',    // Deep blue-black (garder pour compatibilité)
+                'cosmic-night': '#0f172a',   // Standard dark (garder pour compatibilité)
+                'cosmic-dust': '#1e293b',    // Lighter panels (garder pour compatibilité)
+                'pack-bg-dark': '#003366',   // Pack Blue dark variant
+                'pack-bg-base': '#004C99',   // Pack Blue medium variant
+                'pack-bg-light': '#0066CC',  // Pack Blue (couleur principale)
 
                 // Accents - Pack Solutions Blue shades
                 'nebula-purple': '#0066CC',  // Pack Blue as primary
@@ -35,10 +38,11 @@ export default {
                 'glass-highlight': 'rgba(255, 255, 255, 0.05)',
             },
             backgroundImage: {
-                'cosmic-gradient': 'radial-gradient(circle at top center, #0A2540 0%, #0A1628 100%)',
+                'cosmic-gradient': 'radial-gradient(circle at top center, #0A2540 0%, #0A1628 100%)', // Garder pour compatibilité
                 'glass-gradient': 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
                 'active-item': 'linear-gradient(90deg, rgba(0,102,204,0.15) 0%, transparent 100%)',
-                'pack-gradient': 'linear-gradient(135deg, #0066CC 0%, #0099FF 100%)'
+                'pack-gradient': 'linear-gradient(135deg, #0066CC 0%, #0099FF 100%)',
+                'pack-bg-gradient': 'radial-gradient(circle at top center, #0066CC 0%, #003366 100%)' // Nouveau gradient Pack Solutions
             },
             backdropBlur: {
                 'xs': '2px',

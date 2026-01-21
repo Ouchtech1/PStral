@@ -11,7 +11,7 @@ const INDEX_KEY = 'ministral_chat_index';
 
 // Loading component
 const LoadingScreen = () => (
-    <div className="h-screen bg-cosmic-void bg-cosmic-gradient flex items-center justify-center">
+    <div className="h-screen bg-pack-bg-light bg-pack-bg-gradient flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
             <Loader2 size={40} className="text-pack-blue animate-spin" />
             <p className="text-slate-400">Chargement...</p>
@@ -132,7 +132,7 @@ const AuthenticatedApp = () => {
     };
 
     return (
-        <div className="flex h-screen bg-cosmic-void bg-cosmic-gradient text-starlight font-sans overflow-hidden">
+        <div className="flex h-screen bg-pack-bg-light bg-pack-bg-gradient text-white font-sans overflow-hidden">
             {/* Sidebar */}
             <div className={`${sidebarOpen ? 'w-[280px]' : 'w-0'} transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex-shrink-0 overflow-hidden relative z-10`}>
                 <Sidebar

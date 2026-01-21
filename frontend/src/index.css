@@ -6,7 +6,7 @@
 
 @layer base {
     body {
-        @apply bg-cosmic-void text-starlight antialiased font-sans selection:bg-nebula-purple selection:text-white;
+        @apply bg-pack-bg-light text-white antialiased font-sans selection:bg-pack-blue selection:text-white;
     }
 }
 
