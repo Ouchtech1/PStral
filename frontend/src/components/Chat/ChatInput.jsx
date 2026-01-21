@@ -151,7 +151,7 @@ const ChatInput = ({ onSend, disabled, isGenerating = false, onStop }) => {
                     <div className="flex flex-col max-w-[200px]">
                         <span className="text-slate-200 font-medium truncate">{attachment.name}</span>
                         <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wider">{attachment.type}</span>
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider">{attachment.type}</span>
                             {attachment.truncated && (
                                 <span className="text-[10px] text-amber-400 flex items-center gap-0.5" title="Fichier tronqué pour optimiser le traitement">
                                     <AlertTriangle size={10} /> tronqué

@@ -27,13 +27,13 @@ const ChatInterface = ({ mode, sessionId, onUpdateTitle }) => {
 
     useEffect(() => {
         if (!sessionId) return;
-        const saved = localStorage.getItem(`ministral_chat_${sessionId}`);
-        if (saved) {
-            try {
+            const saved = localStorage.getItem(`ministral_chat_${sessionId}`);
+            if (saved) {
+                try {
                 const loaded = JSON.parse(saved);
                 setMessages(loaded);
                 if (loaded.length > 0) setTitleGenerated(true);
-            } catch (e) {
+                } catch (e) {
                 console.error("Erreur chargement:", e);
             }
         }
@@ -55,7 +55,7 @@ const ChatInterface = ({ mode, sessionId, onUpdateTitle }) => {
 
     const streamResponse = async (history) => {
         abortRef.current = new AbortController();
-        setMessages(prev => [...prev, { role: 'assistant', content: '', isThinking: true }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: '', isThinking: true }]);
 
         try {
             const generator = streamChat(history, mode, abortRef.current.signal);
@@ -71,7 +71,7 @@ const ChatInterface = ({ mode, sessionId, onUpdateTitle }) => {
             }
         } catch (err) {
             if (err.name === 'AbortError') {
-                setMessages(prev => {
+            setMessages(prev => {
                     const updated = [...prev];
                     const last = updated[updated.length - 1];
                     if (last.role === 'assistant') {
@@ -304,12 +304,12 @@ const ChatInterface = ({ mode, sessionId, onUpdateTitle }) => {
             <div className="absolute top-4 right-4 z-40 flex gap-2">
                 {messages.length > 0 && (
                     <>
-                        <button
+                    <button
                             onClick={handleExportJSON}
                             className="glass-button p-2 text-slate-300 rounded-lg flex items-center gap-2 text-xs border border-glass-border hover:bg-white/10 transition-colors"
                             title="Exporter en JSON"
-                        >
-                            <Download size={14} />
+                    >
+                        <Download size={14} />
                             JSON
                         </button>
                         <button
@@ -319,7 +319,7 @@ const ChatInterface = ({ mode, sessionId, onUpdateTitle }) => {
                         >
                             <FileText size={14} />
                             PDF
-                        </button>
+                    </button>
                     </>
                 )}
             </div>
@@ -353,16 +353,16 @@ const ChatInterface = ({ mode, sessionId, onUpdateTitle }) => {
                         {messages.map((msg, idx) => {
                             const isLast = msg.role === 'assistant' && idx === messages.length - 1 && !msg.isThinking;
                             return (
-                                <MessageBubble
-                                    key={idx}
-                                    role={msg.role}
-                                    content={msg.content}
-                                    isThinking={msg.isThinking}
-                                    images={msg.images}
-                                    onFeedback={(rating) => handleOpenFeedback(idx, rating)}
+                            <MessageBubble
+                                key={idx}
+                                role={msg.role}
+                                content={msg.content}
+                                isThinking={msg.isThinking}
+                                images={msg.images}
+                                onFeedback={(rating) => handleOpenFeedback(idx, rating)}
                                     onRegenerate={handleRegenerate}
                                     isLastAssistantMessage={isLast}
-                                />
+                            />
                             );
                         })}
                     </div>
