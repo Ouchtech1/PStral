@@ -1,0 +1,147 @@
+# =============================================================================
+# Pstral - Docker Compose for IONOS VPS Production
+# =============================================================================
+# Target: Ubuntu 24.04, 8 Go RAM, 6 vCores, No GPU
+# Total memory limit: 7 Go (leaving 1 Go for system)
+# =============================================================================
+#
+# Usage:
+#   1. Copy .env.ionos.example to .env
+#   2. Configure SECRET_KEY and other variables
+#   3. Run: docker compose -f docker-compose.ionos.yml up -d
+#   4. Access: http://your-server-ip (port 80)
+#
+# First startup will download the model (~2 Go) - be patient!
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Ollama - LLM Server (CPU-only)
+  # ---------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: pstral-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+      - ./ollama/entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    environment:
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-ministral:3b}
+      # CPU optimization for VPS without GPU
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+    deploy:
+      resources:
+        limits:
+          memory: 5G
+          cpus: '4'
+        reservations:
+          memory: 4G
+          cpus: '2'
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s  # Model download can take time
+    networks:
+      - pstral-network
+
+  # ---------------------------------------------------------------------------
+  # Backend - FastAPI Application
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pstral-backend
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      # Ollama connection (internal Docker network)
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-ministral:3b}
+      
+      # Context Management
+      - MAX_HISTORY_MESSAGES=${MAX_HISTORY_MESSAGES:-10}
+      - MAX_FILE_CONTENT_LENGTH=${MAX_FILE_CONTENT_LENGTH:-3000}
+      
+      # Oracle Database (optional)
+      - ORACLE_DSN=${ORACLE_DSN:-}
+      - ORACLE_USER=${ORACLE_USER:-}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD:-}
+      
+      # Security (REQUIRED in production)
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-480}
+    volumes:
+      - pstral-data:/app/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.5'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - pstral-network
+
+  # ---------------------------------------------------------------------------
+  # Frontend - Nginx + React SPA
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - VITE_API_URL=/api/v1
+    container_name: pstral-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - pstral-network
+
+# =============================================================================
+# Networks & Volumes
+# =============================================================================
+networks:
+  pstral-network:
+    driver: bridge
+
+volumes:
+  # Persistent storage for Ollama models (~2-5 Go per model)
+  ollama-data:
+    driver: local
+  
+  # Persistent storage for application data (SQLite databases)
+  pstral-data:
+    driver: local
+
