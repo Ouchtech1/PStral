@@ -8,7 +8,7 @@
 
 set -e
 
-MODEL="${OLLAMA_MODEL:-ministral-3:3b}"
+MODEL="${OLLAMA_MODEL:-ministral:8b}"
 MAX_RETRIES=60
 RETRY_INTERVAL=3
 
