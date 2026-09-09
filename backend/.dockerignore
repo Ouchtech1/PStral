@@ -1,0 +1,9 @@
+data/
+.env*
+*.db
+*.sqlite
+__pycache__/
+*.py[cod]
+.pytest_cache/
+tests/
+README.md

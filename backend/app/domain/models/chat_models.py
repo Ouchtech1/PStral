@@ -1,17 +1,23 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Literal
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
 
 class Message(BaseModel):
-    role: Literal["user", "assistant", "system"]
-    content: str
-    images: Optional[List[str]] = None
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=2000)
+
 
 class ChatRequest(BaseModel):
-    messages: List[Message]
-    stream: bool = True
-    mode: Literal["sql", "email", "wiki", "chat"] = "chat"
+    model_config = ConfigDict(extra="forbid")
 
-class ChatResponse(BaseModel):
-    content: str
-    done: bool
-    context: Optional[dict] = None
+    messages: list[Message] = Field(min_length=1, max_length=5)
+    mode: Literal["chat", "sql"] = "chat"
+
+    @model_validator(mode="after")
+    def last_message_must_be_user(self) -> "ChatRequest":
+        if self.messages[-1].role != "user":
+            raise ValueError("Le dernier message doit provenir de l'utilisateur.")
+        return self

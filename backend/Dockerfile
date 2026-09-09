@@ -8,7 +8,6 @@ ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    libaio1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -23,9 +22,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/root/.local/bin:$PATH"
 
-# Install runtime libs for Oracle (libaio) and wget for healthcheck
+# Install wget for the container healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libaio1 \
     wget \
     && rm -rf /var/lib/apt/lists/*
 

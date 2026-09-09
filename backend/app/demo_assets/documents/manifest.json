@@ -1,0 +1,12 @@
+{
+  "corpus_version": "synthetic-2026-09-08",
+  "documents": [
+    {
+      "id": "DEMO-GUIDE-001",
+      "title": "Guide synthétique de traitement des demandes",
+      "version": "synthetic-1.0",
+      "date": "2026-09-08",
+      "file": "guide_synthetique.md"
+    }
+  ]
+}

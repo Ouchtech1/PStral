@@ -1,0 +1,71 @@
+{
+  "catalog_version": "synthetic-2026-09-08",
+  "synthetic": true,
+  "templates": [
+    {
+      "id": "active_contracts",
+      "title": "Contrats synthétiques actifs",
+      "description": "Liste les contrats synthétiques dont le statut est ACTIF.",
+      "examples": ["liste les contrats actifs", "montre les polices actives"],
+      "synonyms": ["contrat actif", "police active"],
+      "sql": "SELECT c.CONTRAT_ID, c.NUMERO_CONTRAT, c.STATUT, c.DATE_EFFET\nFROM DEMO_CONTRATS c\nWHERE c.STATUT = 'ACTIF'\nORDER BY c.DATE_EFFET DESC",
+      "parameters": []
+    },
+    {
+      "id": "contracts_by_client",
+      "title": "Contrats synthétiques par client",
+      "description": "Recherche les contrats synthétiques d'un client nommé.",
+      "examples": ["contrats du client Martin", "cherche les polices de Dupont"],
+      "synonyms": ["client", "nom client", "assuré"],
+      "sql": "SELECT c.CONTRAT_ID, c.NUMERO_CONTRAT, c.STATUT, c.DATE_EFFET\nFROM DEMO_CONTRATS c\nWHERE UPPER(c.NOM_CLIENT) = UPPER({{client_name}})\nORDER BY c.DATE_EFFET DESC",
+      "parameters": [
+        {"name": "client_name", "type": "string", "required": true, "description": "le nom du client"}
+      ]
+    },
+    {
+      "id": "encours_at_date",
+      "title": "Encours synthétique à une date",
+      "description": "Calcule l'encours synthétique agrégé à une date d'arrêté.",
+      "examples": ["encours au 2026-01-31", "montant de l'encours à la date du 2026-06-30"],
+      "synonyms": ["encours", "date arrêté", "montant"],
+      "sql": "SELECT SUM(e.MONTANT_ENCOURS) AS ENCOURS_TOTAL\nFROM DEMO_ENCOURS e\nWHERE e.DATE_ARRETE = {{as_of_date}}",
+      "parameters": [
+        {"name": "as_of_date", "type": "date", "required": true, "description": "la date d'arrêté au format YYYY-MM-DD"}
+      ]
+    },
+    {
+      "id": "payments_in_period",
+      "title": "Versements synthétiques sur une période",
+      "description": "Liste les versements synthétiques compris entre deux dates incluses.",
+      "examples": ["versements entre 2026-01-01 et 2026-03-31", "paiements sur la période janvier à mars"],
+      "synonyms": ["versement", "paiement", "période"],
+      "sql": "SELECT v.VERSEMENT_ID, v.CONTRAT_ID, v.DATE_VERSEMENT, v.MONTANT\nFROM DEMO_VERSEMENTS v\nWHERE v.DATE_VERSEMENT BETWEEN {{start_date}} AND {{end_date}}\nORDER BY v.DATE_VERSEMENT ASC",
+      "parameters": [
+        {"name": "start_date", "type": "date", "required": true, "description": "la date de début au format YYYY-MM-DD"},
+        {"name": "end_date", "type": "date", "required": true, "description": "la date de fin au format YYYY-MM-DD"}
+      ]
+    },
+    {
+      "id": "payments_by_client",
+      "title": "Versements synthétiques agrégés par client",
+      "description": "Agrège les versements synthétiques d'un client avec une jointure contrat-versement.",
+      "examples": ["total des versements du client Martin", "somme versée par Dupont"],
+      "synonyms": ["total client", "somme client", "jointure versements contrats"],
+      "sql": "SELECT c.NOM_CLIENT, SUM(v.MONTANT) AS TOTAL_VERSEMENTS\nFROM DEMO_CONTRATS c\nJOIN DEMO_VERSEMENTS v ON v.CONTRAT_ID = c.CONTRAT_ID\nWHERE UPPER(c.NOM_CLIENT) = UPPER({{client_name}})\nGROUP BY c.NOM_CLIENT",
+      "parameters": [
+        {"name": "client_name", "type": "string", "required": true, "description": "le nom du client"}
+      ]
+    },
+    {
+      "id": "surrenders_by_status",
+      "title": "Rachats synthétiques par statut",
+      "description": "Liste les demandes de rachat synthétiques selon leur statut.",
+      "examples": ["rachats en attente", "demandes de rachat validées"],
+      "synonyms": ["rachat", "retrait", "demande"],
+      "sql": "SELECT r.RACHAT_ID, r.CONTRAT_ID, r.DATE_DEMANDE, r.STATUT\nFROM DEMO_RACHATS r\nWHERE r.STATUT = {{status}}\nORDER BY r.DATE_DEMANDE DESC",
+      "parameters": [
+        {"name": "status", "type": "enum", "required": true, "allowed_values": ["EN_ATTENTE", "VALIDE", "REFUSE"], "description": "le statut de la demande de rachat"}
+      ]
+    }
+  ]
+}

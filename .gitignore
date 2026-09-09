@@ -5,6 +5,7 @@
 # Environment variables (CRITIQUE - Ne jamais commiter)
 .env
 .env.local
+.env.demo
 .env.*.local
 *.env
 env.production
@@ -106,5 +107,4 @@ htmlcov/
 # Local configuration overrides
 config.local.*
 settings.local.*
-
 

@@ -8,9 +8,10 @@ import json
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel
+from app.core.config import settings
 
 # Database path
-DB_PATH = os.path.join(os.path.dirname(__file__), "audit.db")
+DB_PATH = str(settings.audit_db_path)
 
 
 class AuditLog(BaseModel):
@@ -79,7 +80,9 @@ def log_action(
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    details_json = json.dumps(details) if details else None
+    # Details are intentionally limited to operational metadata. Callers must
+    # never pass prompts, generated SQL, document excerpts, tokens or secrets.
+    details_json = json.dumps(details, ensure_ascii=False) if details else None
     
     cursor.execute("""
         INSERT INTO audit_logs 
@@ -223,4 +226,3 @@ def export_audit_logs(
         return output.getvalue()
     
     return ""
-

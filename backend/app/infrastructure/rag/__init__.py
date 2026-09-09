@@ -1,10 +1,8 @@
-# RAG (Retrieval Augmented Generation) Module
-# This module will handle context retrieval from various sources:
-# - Oracle Database (schema, data context)
-# - Documents (PDF, Word, internal wiki)
+"""Retrieval components enabled by the isolated demonstration profile."""
 
-from .oracle_rag import OracleRAG
+# Keep the Oracle proof-of-concept module out of the import path. Importing it
+# creates a client at module load time and would require production-only Oracle
+# settings even though the demo never connects to that database.
 from .document_rag import DocumentRAG
 
-__all__ = ['OracleRAG', 'DocumentRAG']
-
+__all__ = ["DocumentRAG"]

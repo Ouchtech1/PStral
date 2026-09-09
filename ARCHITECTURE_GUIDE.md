@@ -4,6 +4,8 @@
 
 *Version 1.0 - Janvier 2026*
 
+> Note pour la présentation 2 vCPU / 4 Go : ce document décrit l’architecture historique. Le périmètre réellement livré est celui de [DEMO_RUNBOOK.md](DEMO_RUNBOOK.md) et de [DEMO_VALIDATION.md](DEMO_VALIDATION.md) : Qwen3.5-2B local, RAG documentaire FTS5, catalogue SQL fermé, sans connexion Oracle ni historique persistant.
+
 ---
 
 ## Table des Matières
@@ -1641,4 +1643,3 @@ Pour toute question supplémentaire, consultez les fichiers source ou demandez �
 ---
 
 *Document généré pour Pack Solutions - Usage interne uniquement*
-

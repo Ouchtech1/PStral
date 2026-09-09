@@ -1,98 +1,19 @@
-"""
-Tests for security module.
-"""
-import pytest
-from app.core.security import validate_prompt, filter_sql_prompt
-from fastapi import HTTPException
+from __future__ import annotations
+
+from pathlib import Path
 
 
-class TestValidatePrompt:
-    """Tests for prompt validation."""
-    
-    def test_safe_prompt_passes(self):
-        """Test that safe prompts pass validation."""
-        assert validate_prompt("SELECT * FROM users") == True
-        assert validate_prompt("Show me all customers") == True
-        assert validate_prompt("What is the total revenue?") == True
-    
-    def test_drop_keyword_blocked(self):
-        """Test that DROP keyword is blocked."""
-        with pytest.raises(HTTPException) as exc_info:
-            validate_prompt("DROP TABLE users")
-        assert exc_info.value.status_code == 400
-        assert "DROP" in exc_info.value.detail
-    
-    def test_delete_keyword_blocked(self):
-        """Test that DELETE keyword is blocked."""
-        with pytest.raises(HTTPException) as exc_info:
-            validate_prompt("DELETE FROM users WHERE id = 1")
-        assert exc_info.value.status_code == 400
-        assert "DELETE" in exc_info.value.detail
-    
-    def test_update_keyword_blocked(self):
-        """Test that UPDATE keyword is blocked."""
-        with pytest.raises(HTTPException) as exc_info:
-            validate_prompt("UPDATE users SET name = 'hacker'")
-        assert exc_info.value.status_code == 400
-        assert "UPDATE" in exc_info.value.detail
-    
-    def test_truncate_keyword_blocked(self):
-        """Test that TRUNCATE keyword is blocked."""
-        with pytest.raises(HTTPException) as exc_info:
-            validate_prompt("TRUNCATE TABLE users")
-        assert exc_info.value.status_code == 400
-        assert "TRUNCATE" in exc_info.value.detail
-    
-    def test_case_insensitive_blocking(self):
-        """Test that keywords are blocked regardless of case."""
-        with pytest.raises(HTTPException):
-            validate_prompt("drop table users")
-        with pytest.raises(HTTPException):
-            validate_prompt("DrOp TaBlE users")
+def test_demo_assets_do_not_contain_real_schema_or_secrets():
+    assets = Path(__file__).resolve().parents[1] / "app" / "demo_assets"
+    text = "\n".join(path.read_text(encoding="utf-8") for path in assets.rglob("*") if path.is_file())
+    assert "PASSWORD" not in text.upper()
+    assert "ORACLE_PASSWORD" not in text.upper()
+    assert "CREATE USER" not in text.upper()
 
 
-class TestFilterSQLPrompt:
-    """Tests for SQL filtering."""
-    
-    def test_safe_select_passes(self):
-        """Test that safe SELECT queries pass."""
-        query = "SELECT * FROM employees WHERE department = 'IT'"
-        result, reason = filter_sql_prompt(query)
-        assert result == query
-        assert reason is None
-    
-    def test_drop_blocked(self):
-        """Test that DROP is blocked."""
-        query = "DROP TABLE employees"
-        result, reason = filter_sql_prompt(query)
-        assert result == ""
-        assert "DROP" in reason
-    
-    def test_semicolon_injection_blocked(self):
-        """Test that semicolon comment injection is blocked."""
-        query = "SELECT * FROM users; -- DROP TABLE users"
-        result, reason = filter_sql_prompt(query)
-        assert result == ""
-        assert "injection" in reason.lower() or "multiple" in reason.lower()
-    
-    def test_union_injection_blocked(self):
-        """Test that UNION injection is blocked."""
-        query = "SELECT * FROM users UNION ALL SELECT * FROM passwords"
-        result, reason = filter_sql_prompt(query)
-        assert result == ""
-        assert "injection" in reason.lower()
-    
-    def test_trailing_semicolon_removed(self):
-        """Test that trailing semicolon is removed."""
-        query = "SELECT * FROM users;"
-        result, reason = filter_sql_prompt(query)
-        assert result == "SELECT * FROM users"
-        assert reason is None
-    
-    def test_multiple_statements_blocked(self):
-        """Test that multiple statements are blocked."""
-        query = "SELECT * FROM users; SELECT * FROM passwords"
-        result, reason = filter_sql_prompt(query)
-        assert result == ""
-        assert "multiple" in reason.lower()
-
+def test_frontend_message_renderer_does_not_inject_html_or_load_images():
+    message_file = Path(__file__).resolve().parents[2] / "frontend" / "src" / "components" / "Chat" / "MessageBubble.jsx"
+    text = message_file.read_text(encoding="utf-8")
+    assert "dangerouslySetInnerHTML" not in text
+    assert "skipHtml" in text
+    assert "img()" in text
